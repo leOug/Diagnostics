@@ -1,0 +1,126 @@
+import wx
+import subprocess
+
+
+class DiagnosticsFrame(wx.Frame):
+
+    def __init__(self, title, parent=None):
+        wx.Frame.__init__(self, id=2, title='Diagnostics', parent=parent, style=wx.NO_BORDER, size=(490, 800))
+
+        self.fill_the_frame()
+        self.Center()
+        self.Show()
+
+    def fill_the_frame(self):
+        container_box = wx.BoxSizer(wx.VERTICAL)
+        TitleFont = wx.Font(20, wx.MODERN, wx.NORMAL, wx.NORMAL)
+        InfoFont = wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL)
+
+        self.TheFrameTitle = wx.StaticText(self, label='Diagnostics', pos=(0, 0),size=(200, 50))
+        self.TheFrameTitle.SetFont(TitleFont)
+        container_box.Add(self.TheFrameTitle, flag=wx.ALIGN_CENTRE, border=1)
+
+        self.InformationBox = wx.TextCtrl(self, pos=(0, 0), size=(50, 640), style=wx.TE_MULTILINE)
+        self.InformationBox.SetFont(InfoFont)
+        container_box.Add(self.InformationBox, flag=wx.ALIGN_CENTRE | wx.EXPAND)
+
+        Population = [
+            ['OK', 'Command', 'Exit']
+        ]
+
+        Buttons_Font = wx.Font(15, wx.MODERN, wx.NORMAL, wx.NORMAL)
+
+        for item in Population:
+            create_element = wx.BoxSizer()
+
+            for item_name in item:
+                if item_name == '':
+                    EmptySpace = wx.Panel(self)
+                    create_element.Add(EmptySpace, 1, wx.ALIGN_CENTER | wx.EXPAND, 0)
+                elif item_name == 'Command':
+                    self.Chooser = wx.Choice(self,
+                                             choices=['Check Network', 'Check Serial', 'List USB', 'Ping Local',
+                                                      'Ping Router','Ping Server','Shell'],
+                                             style=wx.CB_READONLY)
+                    create_element.Add(self.Chooser, 1, wx.ALIGN_CENTER | wx.EXPAND, 0)
+                    self.Chooser.Bind(wx.EVT_COMBOBOX, self.button_events)
+                elif item_name != 'Command':
+                    my_custom_item = wx.Button(self, label=item_name)
+                    create_element.Add(my_custom_item, 1, wx.ALIGN_CENTER | wx.EXPAND, 0)
+                    my_custom_item.Bind(wx.EVT_BUTTON, self.button_events, my_custom_item)
+
+            container_box.Add(create_element, proportion=1, flag=wx.EXPAND)
+
+        self.SetSizer(container_box)
+        self.SetFont(Buttons_Font)
+
+    def button_events(self, e):
+        label = e.GetEventObject().GetLabel()
+        self.selection = str(self.Chooser.GetCurrentSelection())
+
+        if label == 'Exit':
+            DiagnosticsFrame.Destroy(self)
+
+        elif label == 'OK':
+            if self.selection == '0':
+                self.InformationBox.Clear()
+                process = subprocess.Popen('ifconfig', stdout=subprocess.PIPE, shell=False)
+                output = process.communicate()[0]
+                for _ in output.split(','):
+                    self.InformationBox.SetInsertionPointEnd()
+                    self.InformationBox.WriteText(str(_))
+            elif self.selection == '1':
+                self.InformationBox.Clear()
+                process1 = subprocess.Popen('dmesg|grep ttyUSB', stdout=subprocess.PIPE, shell=False)
+                output = process1.communicate()[0]
+                for _ in output.split(','):
+                    self.InformationBox.SetInsertionPointEnd()
+                    self.InformationBox.WriteText(str(_))
+            elif self.selection == '2':
+                self.InformationBox.Clear()
+                process2 = subprocess.Popen('lsusb', stdout=subprocess.PIPE, shell=False)
+                output = process2.communicate()[0]
+                for _ in output.split(','):
+                    self.InformationBox.SetInsertionPointEnd()
+                    self.InformationBox.WriteText(str(_))
+            elif self.selection == '3':
+                self.InformationBox.Clear()
+                for i in range(12):
+                    process3 = subprocess.Popen('ping -c 1 8.8.8.8', stdout=subprocess.PIPE, shell=True)
+                    output = str(process3.communicate()[0])
+                    for _ in output.split(','):
+                        self.InformationBox.SetInsertionPointEnd()
+                        self.InformationBox.WriteText(str(_))
+            elif self.selection == '4':
+                self.InformationBox.Clear()
+                for i in range(12):
+                    process3 = subprocess.Popen('ping -c 1 192.168.1.1', stdout=subprocess.PIPE, shell=True)
+                    output = str(process3.communicate()[0])
+                    for _ in output.split(','):
+                        self.InformationBox.SetInsertionPointEnd()
+                        self.InformationBox.WriteText(str(_))
+            elif self.selection == '5':
+                self.InformationBox.Clear()
+                for i in range(12):
+                    process3 = subprocess.Popen('ping -c 1 192.168.1.1', stdout=subprocess.PIPE, shell=True)
+                    output = str(process3.communicate()[0])
+                    for _ in output.split(','):
+                        self.InformationBox.SetInsertionPointEnd()
+                        self.InformationBox.WriteText(str(_))
+            elif self.selection == '6':
+                process4 = subprocess.Popen(['/bin/sh','--geometry=58x31'], bufsize=0, executable='lxterminal', stdin=None, stdout=None, stderr=None,
+                                 preexec_fn=None,
+                                 close_fds=False, shell=False, cwd=None, env=None, universal_newlines=False,
+                                 startupinfo=None)
+
+
+def main():
+
+    app = wx.App()
+    theapp = DiagnosticsFrame(title='Service Mode')
+    theapp.Show()
+    app.MainLoop()
+
+
+if __name__ == '__main__':
+    main()
