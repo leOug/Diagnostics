@@ -117,7 +117,7 @@ class DiagnosticsFrame(wx.Frame):
 def main():
 
     app = wx.App()
-    theapp = DiagnosticsFrame(title='Service Mode')
+    theapp = DiagnosticsFrame(title='The Main App')
     theapp.Show()
     app.MainLoop()
 
